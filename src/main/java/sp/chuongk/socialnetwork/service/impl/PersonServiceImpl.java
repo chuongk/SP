@@ -1,6 +1,5 @@
 package sp.chuongk.socialnetwork.service.impl;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +19,12 @@ import sp.chuongk.socialnetwork.response.UpdateRespone;
 import sp.chuongk.socialnetwork.service.PersonService;
 import sp.chuongk.socialnetwork.util.StringUtil;
 
-
 @Service
 public class PersonServiceImpl implements PersonService {
 
 	@Autowired
 	PersonRepository personRepo;
-	
-	
+
 	@Override
 	public ConnectionResponse addConnection(List<String> connectionList) {
 		boolean success = true;
@@ -37,8 +34,21 @@ public class PersonServiceImpl implements PersonService {
 			message = "Fiend list size is not 2!";
 			return new ConnectionResponse(success, message);
 		}
-		String email1 = connectionList.get(0);
-		String email2 = connectionList.get(1);
+		String email1 = connectionList.get(0).trim();
+		String email2 = connectionList.get(1).trim();
+
+		if (!StringUtil.isEmailFormat(email1)) {
+			success = false;
+			message = email1 + " is in wrong format!";
+			return new ConnectionResponse(success, message);
+		}
+		
+		if (!StringUtil.isEmailFormat(email2)) {
+			success = false;
+			message = email2 + " is in wrong format!";
+			return new ConnectionResponse(success, message);
+		}
+
 		if (email1.equals(email2)) {
 			success = false;
 			message = "Both emails are the same";
@@ -46,7 +56,7 @@ public class PersonServiceImpl implements PersonService {
 		}
 		Person person1 = getAndInsertIfNotExist(email1);
 		Person person2 = getAndInsertIfNotExist(email2);
-		
+
 		if (person1.getFriendList().contains(person2) || person2.getFriendList().contains(person1)) {
 			success = false;
 			message = "Friend connection already exist";
@@ -57,20 +67,20 @@ public class PersonServiceImpl implements PersonService {
 			message = email1 + " blocked " + email2;
 			return new ConnectionResponse(success, message);
 		}
-		
+
 		if (person2.getBlockList().contains(person1)) {
 			success = false;
 			message = email2 + " blocked " + email1;
 			return new ConnectionResponse(success, message);
 		}
-		
+
 		person1.getFriendList().add(person2);
 		person2.getFriendList().add(person1);
 		personRepo.save(person1);
 		personRepo.save(person2);
 		return new ConnectionResponse(success, message);
 	}
-	
+
 	private Person getAndInsertIfNotExist(String email) {
 		Optional<Person> personOp = personRepo.findById(email);
 		if (personOp.isPresent()) {
@@ -94,14 +104,28 @@ public class PersonServiceImpl implements PersonService {
 			response.setMessage("Fiend list size is not 2!");
 			return response;
 		}
-		String email1 = connectionList.get(0);
-		String email2 = connectionList.get(1);
-		List<String> friendList1 = getAndInsertIfNotExist(email1)
-				.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList());
-		List<String> friendList2 = getAndInsertIfNotExist(email2)
-				.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList());
+		String email1 = connectionList.get(0).trim();
+		String email2 = connectionList.get(1).trim();
 		
-		List<String> commonList = friendList1.stream().filter(o -> friendList2.contains(o)).collect(Collectors.toList());
+		if (!StringUtil.isEmailFormat(email1)) {
+			response.setSuccess(false);
+			response.setMessage(email1 + " is in wrong format!");
+			return response;
+		}
+		
+		if (!StringUtil.isEmailFormat(email2)) {
+			response.setSuccess(false);
+			response.setMessage(email2 + " is in wrong format!");
+			return response;
+		}
+		
+		List<String> friendList1 = getAndInsertIfNotExist(email1).getFriendList().stream().map(Person::getEmail)
+				.collect(Collectors.toList());
+		List<String> friendList2 = getAndInsertIfNotExist(email2).getFriendList().stream().map(Person::getEmail)
+				.collect(Collectors.toList());
+
+		List<String> commonList = friendList1.stream().filter(o -> friendList2.contains(o))
+				.collect(Collectors.toList());
 		response.setSuccess(true);
 		response.setFriends(commonList);
 		response.setCount(commonList.size());
@@ -112,6 +136,8 @@ public class PersonServiceImpl implements PersonService {
 	public ConnectionResponse addSubscribe(String requestorEmail, String targetEmail) {
 		boolean success = true;
 		String message = "";
+		requestorEmail = requestorEmail.trim();
+		targetEmail = targetEmail.trim();
 		if (requestorEmail.equals(targetEmail)) {
 			success = false;
 			message = "Both emails are the same";
@@ -119,8 +145,8 @@ public class PersonServiceImpl implements PersonService {
 		}
 		Person requestor = getAndInsertIfNotExist(requestorEmail);
 		Person target = getAndInsertIfNotExist(targetEmail);
-		boolean subscriberAlreadyExist = target.getSubscribers().stream()
-				.map(Person::getEmail).collect(Collectors.toList()).contains(requestorEmail);
+		boolean subscriberAlreadyExist = target.getSubscribers().stream().map(Person::getEmail)
+				.collect(Collectors.toList()).contains(requestorEmail);
 		if (subscriberAlreadyExist) {
 			success = false;
 			message = "Subcribers already exist!";
@@ -135,6 +161,8 @@ public class PersonServiceImpl implements PersonService {
 	public ConnectionResponse addBlock(String requestorEmail, String targetEmail) {
 		boolean success = true;
 		String message = "";
+		requestorEmail = requestorEmail.trim();
+		targetEmail = targetEmail.trim();
 		if (StringUtils.isEmpty(requestorEmail) || StringUtils.isEmpty(targetEmail)) {
 			success = false;
 			message = "Email cannot be empty!";
@@ -145,10 +173,23 @@ public class PersonServiceImpl implements PersonService {
 			message = "Both emails are the same";
 			return new ConnectionResponse(success, message);
 		}
+		
+		if (!StringUtil.isEmailFormat(requestorEmail)) {
+			success = false;
+			message = requestorEmail + " is in wrong format!";			
+			return new ConnectionResponse(success, message);
+		}
+		
+		if (!StringUtil.isEmailFormat(targetEmail)) {
+			success = false;
+			message = targetEmail + " is in wrong format!";	
+			return new ConnectionResponse(success, message);
+		}
+		
 		Person requestor = getAndInsertIfNotExist(requestorEmail);
 		Person target = getAndInsertIfNotExist(targetEmail);
-		boolean blockerAlreadyExist = requestor.getBlockList().stream()
-				.map(Person::getEmail).collect(Collectors.toList()).contains(targetEmail);
+		boolean blockerAlreadyExist = requestor.getBlockList().stream().map(Person::getEmail)
+				.collect(Collectors.toList()).contains(targetEmail);
 		if (blockerAlreadyExist) {
 			success = false;
 			message = "Target already blocked!";
@@ -163,12 +204,13 @@ public class PersonServiceImpl implements PersonService {
 
 	@Override
 	public UpdateRespone doUpdate(String email, String text) {
-		if (StringUtils.isEmpty(email)) {
+		email = email.trim();
+		if (!StringUtil.isEmailFormat(email)) {
 			UpdateRespone response = new UpdateRespone();
 			response.setSuccess(false);
-			response.setMessage("Email cannot be empty!");
+			response.setMessage("Email is in wrong format!");
 		}
-		
+
 		Person sender = getAndInsertIfNotExist(email);
 		Set<String> recepients = new HashSet<>();
 		Set<String> mentionList = StringUtil.findMentionEmails(text);
@@ -176,12 +218,11 @@ public class PersonServiceImpl implements PersonService {
 		recepients.addAll(sender.getSubscribers().stream().map(Person::getEmail).collect(Collectors.toList()));
 		recepients.addAll(sender.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList()));
 		recepients.removeAll(sender.getIsBlockedList().stream().map(Person::getEmail).collect(Collectors.toList()));
-		
+
 		UpdateRespone response = new UpdateRespone();
 		response.setSuccess(true);
 		response.setRecepients(recepients.stream().collect(Collectors.toList()));
 		return response;
 	}
-	
 
 }

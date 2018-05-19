@@ -107,6 +107,12 @@ public class PersonServiceTest {
 		response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
 		assertEquals(response.getMessage(), "Both emails are the same");
+		
+		String emailError = "errorEmail";
+		connections = Arrays.asList(email4, emailError);
+		response = personService.addConnection(connections);
+		assertFalse(response.isSuccess());
+		assertEquals(response.getMessage(), "errorEmail is in wrong format!");
 	}
 	
 	@Test
@@ -141,7 +147,7 @@ public class PersonServiceTest {
 		
 		CommonFriendResponse errorResponse = personService.getCommonFriends(Arrays.asList(email1));
 		assertFalse(errorResponse.isSuccess());
-		assertEquals(errorResponse.getMessage(), "Fiend list size is not 2!");
+		assertEquals(errorResponse.getMessage(), "Fiend list size is not 2!");			
 	}
 	
 	@Test
@@ -188,7 +194,7 @@ public class PersonServiceTest {
 	}
 	
 	@Test
-	public void testNotify() {
+	public void testDoUpdate() {
 		String email1 = "email1@co.in";
 		String email2 = "email2@co.in";
 		List<String> connections = Arrays.asList(email1, email2);

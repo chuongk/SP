@@ -13,10 +13,13 @@ import sp.chuongk.socialnetwork.entity.Person;
 import sp.chuongk.socialnetwork.request.DirectRequest;
 import sp.chuongk.socialnetwork.request.EmailRequest;
 import sp.chuongk.socialnetwork.request.FriendListRequest;
+import sp.chuongk.socialnetwork.request.UpdateRequest;
 import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
 import sp.chuongk.socialnetwork.response.FriendResponse;
 import sp.chuongk.socialnetwork.response.SuccessResponse;
+import sp.chuongk.socialnetwork.response.UpdateRespone;
+import sp.chuongk.socialnetwork.response.UpdateSuccessResponse;
 import sp.chuongk.socialnetwork.service.PersonService;
 
 @RestController
@@ -77,6 +80,19 @@ public class SocialNetworkController {
 		if (response.isSuccess()) {
 			return ResponseEntity.ok(new SuccessResponse(true));
 		}
+		return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping("/email/update")
+	public ResponseEntity<?> doUpdate(@RequestBody UpdateRequest updateRequest){
+		UpdateRespone response = personService.doUpdate(updateRequest.getSender(), updateRequest.getText());
+		if (response.isSuccess()) {
+			UpdateSuccessResponse sucessResponse = new UpdateSuccessResponse();
+			sucessResponse.setSuccess(true);
+			sucessResponse.setRecepients(response.getRecepients());
+			return ResponseEntity.ok(sucessResponse);
+		}
+		
 		return ResponseEntity.ok(response);
 	}
 }
