@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import sp.chuongk.socialnetwork.entity.Person;
+import sp.chuongk.socialnetwork.request.DirectRequest;
 import sp.chuongk.socialnetwork.request.EmailRequest;
-import sp.chuongk.socialnetwork.request.FriendListPojo;
+import sp.chuongk.socialnetwork.request.FriendListRequest;
 import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
 import sp.chuongk.socialnetwork.response.FriendResponse;
@@ -30,7 +31,7 @@ public class SocialNetworkController {
 	}
 	
 	@PostMapping("/connection")
-	public ResponseEntity<?> addConnection(@RequestBody FriendListPojo friendListPojo){
+	public ResponseEntity<?> addConnection(@RequestBody FriendListRequest friendListPojo){
 		ConnectionResponse response = personService.addConnection(friendListPojo.getFriends());
 		if (response.isSuccess()) {
 			return ResponseEntity.ok(new SuccessResponse(true));
@@ -49,7 +50,7 @@ public class SocialNetworkController {
 	}
 	
 	@PostMapping("/connection/common")
-	public ResponseEntity<?> getCommonConnection(@RequestBody FriendListPojo friendListPojo){
+	public ResponseEntity<?> getCommonConnection(@RequestBody FriendListRequest friendListPojo){
 		CommonFriendResponse response= personService.getCommonFriends(friendListPojo.getFriends());
 		if (response.isSuccess()) {
 			FriendResponse successResponse = new FriendResponse();
@@ -59,5 +60,23 @@ public class SocialNetworkController {
 			return ResponseEntity.ok(successResponse);
 		}
 		return ResponseEntity.ok(new ConnectionResponse(response.isSuccess(), response.getMessage()));
+	}
+	
+	@PostMapping("/connection/subscriber")
+	public ResponseEntity<?> addSubscriber(@RequestBody DirectRequest directRequest){
+		ConnectionResponse response = personService.addSubscribe(directRequest.getRequestor(), directRequest.getTarget());
+		if (response.isSuccess()) {
+			return ResponseEntity.ok(new SuccessResponse(true));
+		}
+		return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping("/connection/blocker")
+	public ResponseEntity<?> addBlocker(@RequestBody DirectRequest directRequest){
+		ConnectionResponse response = personService.addBlock(directRequest.getRequestor(), directRequest.getTarget());
+		if (response.isSuccess()) {
+			return ResponseEntity.ok(new SuccessResponse(true));
+		}
+		return ResponseEntity.ok(response);
 	}
 }

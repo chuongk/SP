@@ -2,7 +2,7 @@ package sp.chuongk.socialnetwork.request;
 
 import java.util.List;
 
-public class FriendListPojo {
+public class FriendListRequest {
 	private List<String> friends;
 
 	public List<String> getFriends() {

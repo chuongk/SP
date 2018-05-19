@@ -1,18 +1,24 @@
 package sp.chuongk.socialnetwork.service.impl;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import sp.chuongk.socialnetwork.entity.Person;
 import sp.chuongk.socialnetwork.repository.PersonRepository;
 import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
+import sp.chuongk.socialnetwork.response.UpdateRespone;
 import sp.chuongk.socialnetwork.service.PersonService;
+import sp.chuongk.socialnetwork.util.StringUtil;
 
 
 @Service
@@ -129,6 +135,11 @@ public class PersonServiceImpl implements PersonService {
 	public ConnectionResponse addBlock(String requestorEmail, String targetEmail) {
 		boolean success = true;
 		String message = "";
+		if (StringUtils.isEmpty(requestorEmail) || StringUtils.isEmpty(targetEmail)) {
+			success = false;
+			message = "Email cannot be empty!";
+			return new ConnectionResponse(success, message);
+		}
 		if (requestorEmail.equals(targetEmail)) {
 			success = false;
 			message = "Both emails are the same";
@@ -145,7 +156,32 @@ public class PersonServiceImpl implements PersonService {
 		}
 		requestor.getBlockList().add(target);
 		personRepo.save(requestor);
+		target.getIsBlockedList().add(requestor);
+		personRepo.save(target);
 		return new ConnectionResponse(success, message);
 	}
+
+	@Override
+	public UpdateRespone doUpdate(String email, String text) {
+		if (StringUtils.isEmpty(email)) {
+			UpdateRespone response = new UpdateRespone();
+			response.setSuccess(false);
+			response.setMessage("Email cannot be empty!");
+		}
+		
+		Person sender = getAndInsertIfNotExist(email);
+		Set<String> recepients = new HashSet<>();
+		Set<String> mentionList = StringUtil.findMentionEmails(text);
+		recepients.addAll(mentionList);
+		recepients.addAll(sender.getSubscribers().stream().map(Person::getEmail).collect(Collectors.toList()));
+		recepients.addAll(sender.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList()));
+		recepients.removeAll(sender.getIsBlockedList().stream().map(Person::getEmail).collect(Collectors.toList()));
+		
+		UpdateRespone response = new UpdateRespone();
+		response.setSuccess(true);
+		response.setRecepients(recepients.stream().collect(Collectors.toList()));
+		return response;
+	}
+	
 
 }

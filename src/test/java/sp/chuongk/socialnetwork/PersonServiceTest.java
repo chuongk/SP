@@ -23,6 +23,7 @@ import sp.chuongk.socialnetwork.entity.Person;
 import sp.chuongk.socialnetwork.repository.PersonRepository;
 import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
+import sp.chuongk.socialnetwork.response.UpdateRespone;
 import sp.chuongk.socialnetwork.service.PersonService;
 import sp.chuongk.socialnetwork.service.impl.PersonServiceImpl;
 
@@ -47,15 +48,15 @@ public class PersonServiceTest {
 	
 	@Before
 	public void setUp() {
-	    Person p1 = new Person("email1");
-	    Person p2 = new Person("email2");
-	    Person p3 = new Person("email3");
+	    Person p1 = new Person("email1@co.in");
+	    Person p2 = new Person("email2@co.in");
+	    Person p3 = new Person("email3@co.in");
 	    p2.getBlockList().add(p3);
-	    Person p4 = new Person("email4");
+	    Person p4 = new Person("email4@co.in");
 	    p3.getFriendList().add(p4);
 	    p4.getFriendList().add(p3);
 	    
-	    Person p5 = new Person("email5");
+	    Person p5 = new Person("email5@co.in");
 	    
 	    Mockito.when(personRepository.findById(p1.getEmail()))
 	      .thenReturn(Optional.of(p1));
@@ -71,8 +72,8 @@ public class PersonServiceTest {
 	
 	@Test
 	public void testAddConnectionSuccess() {
-		String email1 = "email1";
-		String email2 = "email2";
+		String email1 = "email1@co.in";
+		String email2 = "email2@co.in";
 		List<String> connections = Arrays.asList(email1, email2);
 		ConnectionResponse response = personService.addConnection(connections);
 		assertTrue(response.isSuccess());
@@ -83,20 +84,20 @@ public class PersonServiceTest {
 	
 	@Test
 	public void testAddConnectionErrors() {
-		String email1 = "email1";
-		String email2 = "email2";
+		String email1 = "email1@co.in";
+		String email2 = "email2@co.in";
 		List<String> connections = Arrays.asList(email1);
 		ConnectionResponse response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
 		assertEquals(response.getMessage(), "Fiend list size is not 2!");
 		
-		String email3 = "email3";
+		String email3 = "email3@co.in";
 		connections = Arrays.asList(email2, email3);
 		response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
-		assertEquals(response.getMessage(), "email2 blocked email3");
+		assertEquals(response.getMessage(), "email2@co.in blocked email3@co.in");
 		
-		String email4 = "email4";
+		String email4 = "email4@co.in";
 		connections = Arrays.asList(email3, email4);
 		response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
@@ -110,10 +111,10 @@ public class PersonServiceTest {
 	
 	@Test
 	public void testGetCommonFriendList() {
-		String email1 = "email1";
-		String email2 = "email2";
-		String email4 = "email4";
-		String email5 = "email5";
+		String email1 = "email1@co.in";
+		String email2 = "email2@co.in";
+		String email4 = "email4@co.in";
+		String email5 = "email5@co.in";
 		List<String> connections = Arrays.asList(email1, email2);
 		personService.addConnection(connections);
 		
@@ -145,8 +146,8 @@ public class PersonServiceTest {
 	
 	@Test
 	public void testAddSubscriber() {
-		String email1 = "email1";
-		String email5 = "email5";
+		String email1 = "email1@co.in";
+		String email5 = "email5@co.in";
 		ConnectionResponse response = personService.addSubscribe(email1, email5);
 		assertTrue(response.isSuccess());
 		
@@ -164,8 +165,8 @@ public class PersonServiceTest {
 	
 	@Test
 	public void testAddBlock() {
-		String email1 = "email1";
-		String email5 = "email5";
+		String email1 = "email1@co.in";
+		String email5 = "email5@co.in";
 		ConnectionResponse response = personService.addBlock(email1, email5);
 		assertTrue(response.isSuccess());
 		
@@ -176,13 +177,43 @@ public class PersonServiceTest {
 		assertFalse(response.isSuccess());
 		assertEquals(response.getMessage(), "Target already blocked!");
 		
-		response = personService.addSubscribe(email5, email1);
+		response = personService.addBlock(email5, email1);
 		assertTrue(response.isSuccess());
 		person5.getBlockList().contains(person1);
 		
 		List<String> connections = Arrays.asList(email1, email5);
 		response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
-		assertEquals(response.getMessage(), "email1 blocked email5");
+		assertEquals(response.getMessage(), "email1@co.in blocked email5@co.in");
+	}
+	
+	@Test
+	public void testNotify() {
+		String email1 = "email1@co.in";
+		String email2 = "email2@co.in";
+		List<String> connections = Arrays.asList(email1, email2);
+		personService.addConnection(connections);
+		
+		String email5 = "email5@co.in";
+		personService.addSubscribe(email5, email2);
+		
+		String email4 = "email4@co.in";
+		
+		connections = Arrays.asList(email2, email4);
+		personService.addConnection(connections);
+		String email3 = "email3@co.in";
+		UpdateRespone updateResponse = personService.doUpdate(email2, "Mention email3@co.in");
+		assertTrue(updateResponse.isSuccess());
+		assertEquals(updateResponse.getRecepients().size(), 4);
+		assertTrue(updateResponse.getRecepients().containsAll(Arrays.asList(email1, email3, email4, email5)));
+		
+		personService.addBlock(email1, email2);
+		personService.addBlock(email4, email2);
+		
+		updateResponse = personService.doUpdate(email2, "Mention email3@co.in");
+		assertTrue(updateResponse.isSuccess());
+		assertEquals(updateResponse.getRecepients().size(), 2);
+		assertTrue(updateResponse.getRecepients().containsAll(Arrays.asList(email3, email5)));
+		
 	}
 }

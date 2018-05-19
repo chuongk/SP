@@ -1,7 +1,9 @@
 package sp.chuongk.socialnetwork.entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -13,13 +15,16 @@ public class Person {
 	private String email;
 	
 	@ManyToMany
-	private List<Person> friendList;
+	private Set<Person> friendList;
 	
 	@ManyToMany
-	private List<Person> blockList;
+	private Set<Person> blockList;
 	
 	@ManyToMany
-	private List<Person> subscribers;
+	private Set<Person> subscribers;
+	
+	@ManyToMany
+	private List<Person> isBlockedList;
 	
 	public Person() {
 		this.email = "default";
@@ -32,9 +37,10 @@ public class Person {
 	}
 	
 	private void initialize() {
-		this.friendList = new ArrayList<>();
-		this.blockList = new ArrayList<>();
-		this.subscribers = new ArrayList<>();
+		this.friendList = new HashSet<>();
+		this.blockList = new HashSet<>();
+		this.subscribers = new HashSet<>();
+		this.isBlockedList = new ArrayList<>();
 	}
 
 
@@ -47,33 +53,36 @@ public class Person {
 		this.email = email;
 	}
 
-
-	public List<Person> getFriendList() {
+	public Set<Person> getFriendList() {
 		return friendList;
 	}
 
-
-	public void setFriendList(List<Person> friendList) {
+	public void setFriendList(Set<Person> friendList) {
 		this.friendList = friendList;
 	}
 
-
-	public List<Person> getBlockList() {
+	public Set<Person> getBlockList() {
 		return blockList;
 	}
 
-
-	public void setBlockList(List<Person> blockList) {
+	public void setBlockList(Set<Person> blockList) {
 		this.blockList = blockList;
 	}
 
-	public List<Person> getSubscribers() {
+	public Set<Person> getSubscribers() {
 		return subscribers;
 	}
 
-	public void setSubscribers(List<Person> subscribers) {
+	public void setSubscribers(Set<Person> subscribers) {
 		this.subscribers = subscribers;
 	}
-	
-	
+
+	public List<Person> getIsBlockedList() {
+		return isBlockedList;
+	}
+
+	public void setIsBlockedList(List<Person> isBlockedList) {
+		this.isBlockedList = isBlockedList;
+	}
+
 }
