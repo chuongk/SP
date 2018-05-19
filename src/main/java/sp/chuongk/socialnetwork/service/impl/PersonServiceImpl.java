@@ -104,10 +104,48 @@ public class PersonServiceImpl implements PersonService {
 
 	@Override
 	public ConnectionResponse addSubscribe(String requestorEmail, String targetEmail) {
+		boolean success = true;
+		String message = "";
+		if (requestorEmail.equals(targetEmail)) {
+			success = false;
+			message = "Both emails are the same";
+			return new ConnectionResponse(success, message);
+		}
 		Person requestor = getAndInsertIfNotExist(requestorEmail);
 		Person target = getAndInsertIfNotExist(targetEmail);
+		boolean subscriberAlreadyExist = target.getSubscribers().stream()
+				.map(Person::getEmail).collect(Collectors.toList()).contains(requestorEmail);
+		if (subscriberAlreadyExist) {
+			success = false;
+			message = "Subcribers already exist!";
+			return new ConnectionResponse(success, message);
+		}
 		target.getSubscribers().add(requestor);
-		return null;
+		personRepo.save(target);
+		return new ConnectionResponse(success, message);
+	}
+
+	@Override
+	public ConnectionResponse addBlock(String requestorEmail, String targetEmail) {
+		boolean success = true;
+		String message = "";
+		if (requestorEmail.equals(targetEmail)) {
+			success = false;
+			message = "Both emails are the same";
+			return new ConnectionResponse(success, message);
+		}
+		Person requestor = getAndInsertIfNotExist(requestorEmail);
+		Person target = getAndInsertIfNotExist(targetEmail);
+		boolean blockerAlreadyExist = requestor.getBlockList().stream()
+				.map(Person::getEmail).collect(Collectors.toList()).contains(targetEmail);
+		if (blockerAlreadyExist) {
+			success = false;
+			message = "Target already blocked!";
+			return new ConnectionResponse(success, message);
+		}
+		requestor.getBlockList().add(target);
+		personRepo.save(requestor);
+		return new ConnectionResponse(success, message);
 	}
 
 }

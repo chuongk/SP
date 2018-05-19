@@ -23,14 +23,18 @@ public class Person {
 	
 	public Person() {
 		this.email = "default";
-		this.friendList = new ArrayList<>();
-		this.blockList = new ArrayList<>();
+		initialize();
 	}
 	
 	public Person(String email_) {
 		this.email = email_;
+		initialize();
+	}
+	
+	private void initialize() {
 		this.friendList = new ArrayList<>();
 		this.blockList = new ArrayList<>();
+		this.subscribers = new ArrayList<>();
 	}
 
 

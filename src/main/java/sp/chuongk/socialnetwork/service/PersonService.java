@@ -14,4 +14,6 @@ public interface PersonService {
 	CommonFriendResponse getCommonFriends(List<String> connectionList);
 	
 	ConnectionResponse addSubscribe(String requestorEmail, String targetEmail);
+	
+	ConnectionResponse addBlock(String requestorEmail, String targetEmail);
 }

@@ -142,4 +142,47 @@ public class PersonServiceTest {
 		assertFalse(errorResponse.isSuccess());
 		assertEquals(errorResponse.getMessage(), "Fiend list size is not 2!");
 	}
+	
+	@Test
+	public void testAddSubscriber() {
+		String email1 = "email1";
+		String email5 = "email5";
+		ConnectionResponse response = personService.addSubscribe(email1, email5);
+		assertTrue(response.isSuccess());
+		
+		Person person1 = personService.getByEmail(email1);
+		Person person5 = personService.getByEmail(email5);
+		assertTrue(person5.getSubscribers().contains(person1));
+		response = personService.addSubscribe(email1, email5);
+		assertFalse(response.isSuccess());
+		assertEquals(response.getMessage(), "Subcribers already exist!");
+		
+		response = personService.addSubscribe(email5, email1);
+		assertTrue(response.isSuccess());
+		person1.getSubscribers().contains(person5);
+	}
+	
+	@Test
+	public void testAddBlock() {
+		String email1 = "email1";
+		String email5 = "email5";
+		ConnectionResponse response = personService.addBlock(email1, email5);
+		assertTrue(response.isSuccess());
+		
+		Person person1 = personService.getByEmail(email1);
+		Person person5 = personService.getByEmail(email5);
+		assertTrue(person1.getBlockList().contains(person5));
+		response = personService.addBlock(email1, email5);
+		assertFalse(response.isSuccess());
+		assertEquals(response.getMessage(), "Target already blocked!");
+		
+		response = personService.addSubscribe(email5, email1);
+		assertTrue(response.isSuccess());
+		person5.getBlockList().contains(person1);
+		
+		List<String> connections = Arrays.asList(email1, email5);
+		response = personService.addConnection(connections);
+		assertFalse(response.isSuccess());
+		assertEquals(response.getMessage(), "email1 blocked email5");
+	}
 }
