@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import sp.chuongk.socialnetwork.entity.Person;
 import sp.chuongk.socialnetwork.repository.PersonRepository;
+import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
 import sp.chuongk.socialnetwork.service.PersonService;
 import sp.chuongk.socialnetwork.service.impl.PersonServiceImpl;
@@ -100,6 +101,11 @@ public class PersonServiceTest {
 		response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
 		assertEquals(response.getMessage(), "Friend connection already exist");
+		
+		connections = Arrays.asList(email4, email4);
+		response = personService.addConnection(connections);
+		assertFalse(response.isSuccess());
+		assertEquals(response.getMessage(), "Both emails are the same");
 	}
 	
 	@Test
@@ -111,7 +117,7 @@ public class PersonServiceTest {
 		List<String> connections = Arrays.asList(email1, email2);
 		personService.addConnection(connections);
 		
-		List<String> commonList12 = personService.getCommonFriends(email1, email2);
+		List<String> commonList12 = personService.getCommonFriends(Arrays.asList(email1, email2)).getFriends();
 		assertEquals(commonList12.size(), 0);
 		connections = Arrays.asList(email2, email5);
 		personService.addConnection(connections);
@@ -122,14 +128,18 @@ public class PersonServiceTest {
 		connections = Arrays.asList(email1, email4);
 		personService.addConnection(connections);
 		
-		commonList12 = personService.getCommonFriends(email1, email2);
+		commonList12 = personService.getCommonFriends(Arrays.asList(email1, email2)).getFriends();
 		assertEquals(commonList12.size(), 2);
 		assertTrue(commonList12.contains(email4));
 		assertTrue(commonList12.contains(email5));
 		
-		List<String> commonList15 = personService.getCommonFriends(email1, email5);
+		List<String> commonList15 = personService.getCommonFriends(Arrays.asList(email1, email5)).getFriends();
 		assertEquals(commonList15.size(), 1);
 		assertTrue(commonList15.contains(email2));
 		assertFalse(commonList15.contains(email4));
+		
+		CommonFriendResponse errorResponse = personService.getCommonFriends(Arrays.asList(email1));
+		assertFalse(errorResponse.isSuccess());
+		assertEquals(errorResponse.getMessage(), "Fiend list size is not 2!");
 	}
 }

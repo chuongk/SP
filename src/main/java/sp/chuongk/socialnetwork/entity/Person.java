@@ -18,6 +18,9 @@ public class Person {
 	@ManyToMany
 	private List<Person> blockList;
 	
+	@ManyToMany
+	private List<Person> subscribers;
+	
 	public Person() {
 		this.email = "default";
 		this.friendList = new ArrayList<>();
@@ -58,6 +61,14 @@ public class Person {
 
 	public void setBlockList(List<Person> blockList) {
 		this.blockList = blockList;
+	}
+
+	public List<Person> getSubscribers() {
+		return subscribers;
+	}
+
+	public void setSubscribers(List<Person> subscribers) {
+		this.subscribers = subscribers;
 	}
 	
 	

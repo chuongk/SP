@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sp.chuongk.socialnetwork.entity.Person;
 import sp.chuongk.socialnetwork.request.EmailRequest;
 import sp.chuongk.socialnetwork.request.FriendListPojo;
+import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
 import sp.chuongk.socialnetwork.response.FriendResponse;
 import sp.chuongk.socialnetwork.response.SuccessResponse;
@@ -45,5 +46,18 @@ public class SocialNetworkController {
 		response.setFriends(person.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList()));
 		response.setCount(person.getFriendList().size());
 		return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping("/connection/common")
+	public ResponseEntity<?> getCommonConnection(@RequestBody FriendListPojo friendListPojo){
+		CommonFriendResponse response= personService.getCommonFriends(friendListPojo.getFriends());
+		if (response.isSuccess()) {
+			FriendResponse successResponse = new FriendResponse();
+			successResponse.setCount(response.getCount());
+			successResponse.setSuccess(true);
+			successResponse.setFriends(response.getFriends());
+			return ResponseEntity.ok(successResponse);
+		}
+		return ResponseEntity.ok(new ConnectionResponse(response.isSuccess(), response.getMessage()));
 	}
 }

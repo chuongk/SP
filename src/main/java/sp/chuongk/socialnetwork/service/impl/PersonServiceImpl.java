@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 
 import sp.chuongk.socialnetwork.entity.Person;
 import sp.chuongk.socialnetwork.repository.PersonRepository;
+import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
 import sp.chuongk.socialnetwork.service.PersonService;
 
@@ -32,6 +33,11 @@ public class PersonServiceImpl implements PersonService {
 		}
 		String email1 = connectionList.get(0);
 		String email2 = connectionList.get(1);
+		if (email1.equals(email2)) {
+			success = false;
+			message = "Both emails are the same";
+			return new ConnectionResponse(success, message);
+		}
 		Person person1 = getAndInsertIfNotExist(email1);
 		Person person2 = getAndInsertIfNotExist(email2);
 		
@@ -75,14 +81,33 @@ public class PersonServiceImpl implements PersonService {
 	}
 
 	@Override
-	public List<String> getCommonFriends(String email1, String email2) {
+	public CommonFriendResponse getCommonFriends(List<String> connectionList) {
+		CommonFriendResponse response = new CommonFriendResponse();
+		if (CollectionUtils.isEmpty(connectionList) || connectionList.size() != 2) {
+			response.setSuccess(false);
+			response.setMessage("Fiend list size is not 2!");
+			return response;
+		}
+		String email1 = connectionList.get(0);
+		String email2 = connectionList.get(1);
 		List<String> friendList1 = getAndInsertIfNotExist(email1)
 				.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList());
 		List<String> friendList2 = getAndInsertIfNotExist(email2)
 				.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList());
 		
 		List<String> commonList = friendList1.stream().filter(o -> friendList2.contains(o)).collect(Collectors.toList());
-		return commonList;
+		response.setSuccess(true);
+		response.setFriends(commonList);
+		response.setCount(commonList.size());
+		return response;
+	}
+
+	@Override
+	public ConnectionResponse addSubscribe(String requestorEmail, String targetEmail) {
+		Person requestor = getAndInsertIfNotExist(requestorEmail);
+		Person target = getAndInsertIfNotExist(targetEmail);
+		target.getSubscribers().add(requestor);
+		return null;
 	}
 
 }

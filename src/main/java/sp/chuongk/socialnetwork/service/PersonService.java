@@ -3,6 +3,7 @@ package sp.chuongk.socialnetwork.service;
 import java.util.List;
 
 import sp.chuongk.socialnetwork.entity.Person;
+import sp.chuongk.socialnetwork.response.CommonFriendResponse;
 import sp.chuongk.socialnetwork.response.ConnectionResponse;
 
 public interface PersonService {
@@ -10,5 +11,7 @@ public interface PersonService {
 	
 	Person getByEmail(String email);
 	
-	List<String> getCommonFriends(String email1, String email2);
+	CommonFriendResponse getCommonFriends(List<String> connectionList);
+	
+	ConnectionResponse addSubscribe(String requestorEmail, String targetEmail);
 }
