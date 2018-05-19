@@ -33,7 +33,7 @@ public class PersonServiceTest {
     static class PersonServiceTestContextConfiguration {
   
         @Bean
-        public PersonService employeeService() {
+        public PersonService personService() {
             return new PersonServiceImpl();
         }
     }
@@ -71,6 +71,9 @@ public class PersonServiceTest {
 		List<String> connections = Arrays.asList(email1, email2);
 		ConnectionResponse response = personService.addConnection(connections);
 		assertTrue(response.isSuccess());
+		Person person1 = personService.getByEmail(email1);
+		Person person2 = personService.getByEmail(email2);
+		assertTrue(person1.getFriendList().contains(person2));
 	}
 	
 	@Test

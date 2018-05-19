@@ -54,8 +54,8 @@ public class PersonServiceImpl implements PersonService {
 		
 		person1.getFriendList().add(person2);
 		person2.getFriendList().add(person1);
-		
-		personRepo.saveAll(Arrays.asList(person1, person2));
+		personRepo.save(person1);
+		personRepo.save(person2);
 		return new ConnectionResponse(success, message);
 	}
 	
@@ -67,6 +67,11 @@ public class PersonServiceImpl implements PersonService {
 		Person person = new Person(email);
 		personRepo.save(person);
 		return person;
+	}
+
+	@Override
+	public Person getByEmail(String email) {
+		return getAndInsertIfNotExist(email);
 	}
 
 }
