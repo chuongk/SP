@@ -54,6 +54,8 @@ public class PersonServiceTest {
 	    p3.getFriendList().add(p4);
 	    p4.getFriendList().add(p3);
 	    
+	    Person p5 = new Person("email5");
+	    
 	    Mockito.when(personRepository.findById(p1.getEmail()))
 	      .thenReturn(Optional.of(p1));
 	    Mockito.when(personRepository.findById(p2.getEmail()))
@@ -62,6 +64,8 @@ public class PersonServiceTest {
 	      .thenReturn(Optional.of(p3));
 	    Mockito.when(personRepository.findById(p4.getEmail()))
 	      .thenReturn(Optional.of(p4));
+	    Mockito.when(personRepository.findById(p5.getEmail()))
+	      .thenReturn(Optional.of(p5));
 	}
 	
 	@Test
@@ -96,5 +100,36 @@ public class PersonServiceTest {
 		response = personService.addConnection(connections);
 		assertFalse(response.isSuccess());
 		assertEquals(response.getMessage(), "Friend connection already exist");
+	}
+	
+	@Test
+	public void testGetCommonFriendList() {
+		String email1 = "email1";
+		String email2 = "email2";
+		String email4 = "email4";
+		String email5 = "email5";
+		List<String> connections = Arrays.asList(email1, email2);
+		personService.addConnection(connections);
+		
+		List<String> commonList12 = personService.getCommonFriends(email1, email2);
+		assertEquals(commonList12.size(), 0);
+		connections = Arrays.asList(email2, email5);
+		personService.addConnection(connections);
+		connections = Arrays.asList(email1, email5);
+		personService.addConnection(connections);
+		connections = Arrays.asList(email2, email4);
+		personService.addConnection(connections);
+		connections = Arrays.asList(email1, email4);
+		personService.addConnection(connections);
+		
+		commonList12 = personService.getCommonFriends(email1, email2);
+		assertEquals(commonList12.size(), 2);
+		assertTrue(commonList12.contains(email4));
+		assertTrue(commonList12.contains(email5));
+		
+		List<String> commonList15 = personService.getCommonFriends(email1, email5);
+		assertEquals(commonList15.size(), 1);
+		assertTrue(commonList15.contains(email2));
+		assertFalse(commonList15.contains(email4));
 	}
 }

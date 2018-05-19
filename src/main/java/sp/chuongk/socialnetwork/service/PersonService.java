@@ -9,4 +9,6 @@ public interface PersonService {
 	ConnectionResponse addConnection(List<String> connectionList);
 	
 	Person getByEmail(String email);
+	
+	List<String> getCommonFriends(String email1, String email2);
 }

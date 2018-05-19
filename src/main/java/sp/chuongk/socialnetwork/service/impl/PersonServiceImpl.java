@@ -1,8 +1,8 @@
 package sp.chuongk.socialnetwork.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +72,17 @@ public class PersonServiceImpl implements PersonService {
 	@Override
 	public Person getByEmail(String email) {
 		return getAndInsertIfNotExist(email);
+	}
+
+	@Override
+	public List<String> getCommonFriends(String email1, String email2) {
+		List<String> friendList1 = getAndInsertIfNotExist(email1)
+				.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList());
+		List<String> friendList2 = getAndInsertIfNotExist(email2)
+				.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList());
+		
+		List<String> commonList = friendList1.stream().filter(o -> friendList2.contains(o)).collect(Collectors.toList());
+		return commonList;
 	}
 
 }
