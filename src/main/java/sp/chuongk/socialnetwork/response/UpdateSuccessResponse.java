@@ -3,14 +3,14 @@ package sp.chuongk.socialnetwork.response;
 import java.util.List;
 
 public class UpdateSuccessResponse {
-	boolean isSuccess;
+	boolean success;
 	List<String> recepients;
 	
 	public boolean isSuccess() {
-		return isSuccess;
+		return success;
 	}
 	public void setSuccess(boolean isSuccess) {
-		this.isSuccess = isSuccess;
+		this.success = isSuccess;
 	}
 	public List<String> getRecepients() {
 		return recepients;

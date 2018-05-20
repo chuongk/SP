@@ -1,9 +1,11 @@
 package sp.chuongk.socialnetwork;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,11 +46,18 @@ public class SocialNetworkController {
 	
 	@PostMapping("/email")
 	public ResponseEntity<?> getEmail(@RequestBody EmailRequest email){
-		Person person = personService.getByEmail(email.getEmail());
 		FriendResponse response = new FriendResponse();
-		response.setSuccess(true);
-		response.setFriends(person.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList()));
-		response.setCount(person.getFriendList().size());
+		if (StringUtils.isEmpty(email.getEmail())) {
+			response.setSuccess(false);
+			response.setFriends(new ArrayList<>());
+			response.setCount(0);
+		}
+		else{
+			Person person = personService.getByEmail(email.getEmail());
+			response.setSuccess(true);
+			response.setFriends(person.getFriendList().stream().map(Person::getEmail).collect(Collectors.toList()));
+			response.setCount(person.getFriendList().size());
+		}		
 		return ResponseEntity.ok(response);
 	}
 	
@@ -65,7 +74,7 @@ public class SocialNetworkController {
 		return ResponseEntity.ok(new ConnectionResponse(response.isSuccess(), response.getMessage()));
 	}
 	
-	@PostMapping("/connection/subscriber")
+	@PostMapping("/email/subscribe")
 	public ResponseEntity<?> addSubscriber(@RequestBody DirectRequest directRequest){
 		ConnectionResponse response = personService.addSubscribe(directRequest.getRequestor(), directRequest.getTarget());
 		if (response.isSuccess()) {
@@ -74,7 +83,7 @@ public class SocialNetworkController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PostMapping("/connection/blocker")
+	@PostMapping("/email/block")
 	public ResponseEntity<?> addBlocker(@RequestBody DirectRequest directRequest){
 		ConnectionResponse response = personService.addBlock(directRequest.getRequestor(), directRequest.getTarget());
 		if (response.isSuccess()) {

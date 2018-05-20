@@ -162,7 +162,7 @@ public class PersonServiceTest {
 		assertTrue(person5.getSubscribers().contains(person1));
 		response = personService.addSubscribe(email1, email5);
 		assertFalse(response.isSuccess());
-		assertEquals(response.getMessage(), "Subcribers already exist!");
+		assertEquals(response.getMessage(), "Requestor already subscribed to the target!");
 		
 		response = personService.addSubscribe(email5, email1);
 		assertTrue(response.isSuccess());

@@ -1,5 +1,6 @@
 package sp.chuongk.socialnetwork.service.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -149,7 +150,7 @@ public class PersonServiceImpl implements PersonService {
 				.collect(Collectors.toList()).contains(requestorEmail);
 		if (subscriberAlreadyExist) {
 			success = false;
-			message = "Subcribers already exist!";
+			message = "Requestor already subscribed to the target!";
 			return new ConnectionResponse(success, message);
 		}
 		target.getSubscribers().add(requestor);
@@ -208,7 +209,9 @@ public class PersonServiceImpl implements PersonService {
 		if (!StringUtil.isEmailFormat(email)) {
 			UpdateRespone response = new UpdateRespone();
 			response.setSuccess(false);
+			response.setRecepients(Collections.emptyList());
 			response.setMessage("Email is in wrong format!");
+			return response;
 		}
 
 		Person sender = getAndInsertIfNotExist(email);
